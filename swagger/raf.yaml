@@ -1,0 +1,146 @@
+swagger: "2.0"
+
+info:
+  title: "RAF API"
+  version: "1.0"
+consumes:
+  - "application/json"
+produces:
+  - "application/json"
+
+basePath: "/v1.0"
+
+paths:
+  /raf/:
+    post:
+      tags: [RAF]
+      operationId: api.raf.calculate
+      summary: "Calculates RAF score for a given patient"
+      parameters:
+      - in: "body"
+        name: "beneficiary"
+        description: "Patient"
+        required: true
+        schema:
+          $ref: "#/definitions/Beneficiary"
+      responses:
+        200:
+          description: "Resulting Scores"
+          schema:
+              $ref: "#/definitions/Score"
+
+definitions:
+
+  Beneficiary:
+    type: "object"
+    properties: 
+      id:
+        type: "integer"
+        format: "int64"
+        description: "Client Identifier"
+        example: 123
+      sex: 
+        type: "string"
+        enum: ["male", "female"]
+      dob: 
+        type: "string" 
+        format: "date"
+        description: "Date of Birth"
+        example: "20150730"
+      ltiMedicaid:
+        type: "boolean"
+        description: "Medicaid Long Term Institutionalized"
+      newEnrolleeMedicaid: 
+        type: "boolean" 
+        description: "Medicaid Newenrollee"
+      originalReasonEntitlement: 
+        type: "string"
+        enum: ["OASI", "DIB", "ESRD", "DIB_AND_ESRD"]
+        description: >
+          "Entitlement Reason":
+            * `OASI` - Old Age and Survivors Insurance
+            * `DIB` - Disability Insurance Benefits
+            * `ESRD` - End-stage Renal Disease
+            * `DIB_AND_ESRD` - Both DIB and ESRD
+      diagnosis:
+        type: "array"
+        items:
+          $ref: "#/definitions/Diagnosis"
+    required: ["id", "sex", "dob", "ltiMedicaid", "newEnrolleeMedicaid", "originalReasonEntitlement"]
+
+  Diagnosis:
+    type: "object"
+    properties:
+      icdCode:
+        type: "string"
+        description: "ICD 10 Code. Stripped of all special characters"
+        example: "A0223"
+    required: ["icdCode"]
+
+  Score:
+    type: "object"
+    properties:
+        totals:
+          description: "Total Scores for each model"
+          $ref: "#/definitions/Totals"
+        invalid:
+          type: "object"
+          description: "Invalid ICD10 Codes and the reason they are invalid"
+        attributes:
+          description: "Attributes determining RAF score"
+          $ref: "#/definitions/Attributes"
+
+  Totals:
+    type: "object"
+    description: "All Scores"
+    properties:
+      "Community FBA":
+        type: "string"
+        description: "Community Full Benefit Dual Aged"
+      "Community FBD":
+        type: "string"
+        description: "Community Full Benefit Dual Disability"
+      "Community NA":
+        type: "string"
+        description: "Community Non-Dual Aged"
+      "Community ND":
+        type: "string"
+        description: "Community Non-Dual Disabled"
+      "Community PBA":
+        type: "string"
+        description: "Community Partial Benefit Dual Aged"
+      "Community PBD":
+        type: "string"
+        description: "Community Partial Benefit Dual Disabled"
+      "Institutional":
+        type: "string"
+        description: "Institutional"
+      "New Enrollee":
+        type: "string"
+        description: "New Enrollee"
+      "SNP New Enrollee":
+        type: "string"
+        description: "SNP New Enrollee"
+
+  Attributes:
+    type: "object"
+    description: "Attributes determining RAF score"
+    properties:
+      valid:
+        type: "boolean"
+        description: "Whether this is a valid property in calculating RAF score"
+      type:
+        type: "string"
+        enum: ["code", "interaction", "demographic"]
+        description: >
+          "Attribute Type":
+            * `code` - HCC related code.  Includes list of related ICD 10 codes.
+            * `interaction` - Interaction
+            * `demographic` - age, sex, disability related
+      coefficients:
+        type: "object"
+        description: "Coefficient value for each model.   0 if it is not valid"
+      description:
+        type: "string"
+        description: "Description of the attribute"
+

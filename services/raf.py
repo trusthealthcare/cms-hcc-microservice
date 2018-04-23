@@ -1,6 +1,9 @@
 import json
 from datetime import datetime
 import os
+from werkzeug.contrib.cache import SimpleCache
+
+cache = SimpleCache()
 
 """
     RESTful Endpoints
@@ -84,11 +87,10 @@ class RafCalculator:
         Initialize all parameters
     """
     def __init__(self):
-        directory = os.path.dirname(__file__)
-        fh = open(os.path.join(directory, "data.json"), 'r')
-        self.data = json.loads(fh.read())
-        fh.close()
 
+        self.data = self.__get_cache_data()
+
+        #TODO Don't do this everytime
         self.entitlement_reason_map = {}
         for entitlement_reason in self.data["entitlementReason"]:
             self.entitlement_reason_map[entitlement_reason] = \
@@ -384,3 +386,19 @@ class RafCalculator:
             attribute["description"] = self.data["coefficients"][coef_name]["description"]
         else:
             attribute["coefficients"][description] = 0.0
+
+    """
+        Gets the key data from cache.  Minimizing json parsing
+    """
+    @staticmethod
+    def __get_cache_data():
+        print("getting")
+        data = cache.get('data')
+        if data is None:
+            print("loading")
+            directory = os.path.dirname(__file__)
+            fh = open(os.path.join(directory, "data.json"), 'r')
+            data = json.loads(fh.read())
+            fh.close()
+            cache.set('data', data, timeout = 5*60)
+        return data

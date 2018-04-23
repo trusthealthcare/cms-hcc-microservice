@@ -11,8 +11,8 @@ class CalculatorTestCase(unittest.TestCase):
     def tearDown(self):
         print("teardown")
 
-    @staticmethod
-    def testCalculator():
+    # TODO write this properly
+    def testCalculator(self):
         jane = Beneficiary(2, "female", "19740824", 1, True)
         jane.add_diagnosis(Diagnosis("D66"))
         jane.add_diagnosis(Diagnosis("C182"))

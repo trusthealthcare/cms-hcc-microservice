@@ -392,10 +392,8 @@ class RafCalculator:
     """
     @staticmethod
     def __get_cache_data():
-        print("getting")
         data = cache.get('data')
         if data is None:
-            print("loading")
             directory = os.path.dirname(__file__)
             fh = open(os.path.join(directory, "data.json"), 'r')
             data = json.loads(fh.read())

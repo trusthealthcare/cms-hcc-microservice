@@ -2,6 +2,8 @@ import json
 from datetime import datetime
 import os
 from werkzeug.contrib.cache import SimpleCache
+from openpyxl import load_workbook
+from openpyxl.styles import Border, Font, Side
 
 cache = SimpleCache()
 
@@ -16,7 +18,7 @@ class RafService:
     def calculate(beneficiary_in) -> object:
         beneficiary = Beneficiary(beneficiary_in['id'],
                                   beneficiary_in['sex'],
-                                  beneficiary_in['dob'],
+                                  datetime.strptime(beneficiary_in['dob'], "%Y%m%d"),
                                   beneficiary_in['originalReasonEntitlement'],
                                   beneficiary_in['ltiMedicaid'],
                                   beneficiary_in['newEnrolleeMedicaid'])
@@ -26,6 +28,58 @@ class RafService:
 
         calc = RafCalculator()
         return calc.calculate(beneficiary)
+
+    @staticmethod
+    def calculate_excel(excel) -> object:
+
+        print('Calculate')
+        wb = load_workbook(excel, data_only=True)
+        sheet_name = wb['data']
+
+        sheet_name['Q1'].value = 'Community NA'
+        sheet_name['R1'].value = 'Community ND'
+        sheet_name['S1'].value = 'Community FBA'
+        sheet_name['T1'].value = 'Community FBD'
+        sheet_name['U1'].value = 'Community PBA'
+        sheet_name['V1'].value = 'Community PBD'
+        sheet_name['W1'].value = 'Institutional'
+        sheet_name['X1'].value = 'New Enrollee'
+        sheet_name['Y1'].value = 'SNP New Enrollee'
+        font = Font(name='Calibri', size=14, bold=True)
+        border = Border(bottom=Side(border_style='thin', color='00000000'))
+        for column in ['Q','R','S','T','U','V','W','X','Y']:
+            sheet_name[column + '1'].font = font
+            sheet_name[column + '1'].border = border
+            sheet_name.column_dimensions[column].width = 17.5
+
+        row = 2
+        calc = RafCalculator()
+        while True:
+            if not sheet_name['A' + str(row)].value:
+                break
+            beneficiary = Beneficiary(sheet_name['A' + str(row)].value,
+                                      sheet_name['B' + str(row)].value,
+                                      sheet_name['C' + str(row)].value,
+                                      sheet_name['D' + str(row)].value,
+                                      sheet_name['E' + str(row)].value,
+                                      sheet_name['F' + str(row)].value,
+                                      )
+            for i in ['G','H','I','K','L','M','N','O','P']:
+                if sheet_name[i + str(row)].value != '':
+                    beneficiary.add_diagnosis(Diagnosis(sheet_name[i + str(row)].value))
+
+            results = calc.calculate(beneficiary)
+            sheet_name['Q' + str(row)] = results['totals']['Community NA']
+            sheet_name['R' + str(row)] = results['totals']['Community ND']
+            sheet_name['S' + str(row)] = results['totals']['Community FBA']
+            sheet_name['T' + str(row)] = results['totals']['Community FBD']
+            sheet_name['U' + str(row)] = results['totals']['Community PBA']
+            sheet_name['V' + str(row)] = results['totals']['Community PBD']
+            sheet_name['W' + str(row)] = results['totals']['Institutional']
+            sheet_name['X' + str(row)] = results['totals']['New Enrollee']
+            sheet_name['Y' + str(row)] = results['totals']['SNP New Enrollee']
+            row += 1
+        return wb
 
 
 """
@@ -58,7 +112,7 @@ class Beneficiary:
         super().__init__()
         self.hicno = hicno
         self.sex = sex
-        self.dob = datetime.strptime(dob, "%Y%m%d")
+        self.dob = dob
         self.age = self.age_as_of(self.dob, dateasof)
         self.medicaid_lti = medicaid_lti
         self.new_enrollee_medicaid = new_enrollee_medicaid
@@ -317,7 +371,7 @@ class RafCalculator:
             self.__add_interaction("CHF_gCopdCF", attributes)
         if diag_cat["g_copd_cf"] and diag_cat["card_resp_fail"]:
             self.__add_interaction("gCopdCF_CARD_RESP_FAIL", attributes)
-        if diag_cat["sepsis"] and diag_cat["pressure_ulcer"]:
+        if diag_cat["sepsis"] and pressure_ulcer:
             self.__add_interaction("SEPSIS_PRESSURE_ULCER", attributes)
         if diag_cat["sepsis"] and "HCC188" in attributes:
             self.__add_interaction("SEPSIS_ARTIF_OPENINGS", attributes)
@@ -329,7 +383,7 @@ class RafCalculator:
             self.__add_interaction("gCopdCF_ASP_SPEC_BACT_PNEUM", attributes)
         if "HCC114" in attributes and pressure_ulcer:
             self.__add_interaction("ASP_SPEC_BACT_PNEUM_PRES_ULC", attributes)
-        if diag_cat["sepsis"] and attributes in "HCC114":
+        if diag_cat["sepsis"] and "HCC114" in attributes:
             self.__add_interaction("SEPSIS_ASP_SPEC_BACT_PNEUM", attributes)
         if "HCC57" in attributes and diag_cat["g_copd_cf"]:
             self.__add_interaction("SCHIZOPHRENIA_gCopdCF", attributes)
@@ -398,5 +452,5 @@ class RafCalculator:
             fh = open(os.path.join(directory, "data.json"), 'r')
             data = json.loads(fh.read())
             fh.close()
-            cache.set('data', data, timeout = 5*60)
+            cache.set('data', data, timeout=5*60)
         return data

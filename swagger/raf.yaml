@@ -3,11 +3,8 @@ swagger: "2.0"
 info:
   title: "RAF API"
   version: "1.0"
-consumes:
-  - "application/json"
-produces:
-  - "application/json"
 
+host: "api.whattheraf.com"
 basePath: "/v1.0"
 
 paths:
@@ -16,6 +13,10 @@ paths:
       tags: [RAF]
       operationId: api.raf.calculate
       summary: "Calculates RAF score for a given patient"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
       parameters:
       - in: "body"
         name: "beneficiary"
@@ -28,6 +29,26 @@ paths:
           description: "Resulting Scores"
           schema:
               $ref: "#/definitions/Score"
+  /raf/upload:
+    post:
+      tags: [RAF]
+      operationId: api.raf.calculate_excel
+      summary: "Upload an excel file following specs"
+      consumes:
+      - "multipart/form-data"
+      produces:
+      - "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      parameters:
+      - in: "formData"
+        name: "excel"
+        description: "Excel file to upload"
+        required: true
+        type: "file"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "file"
 
 definitions:
 

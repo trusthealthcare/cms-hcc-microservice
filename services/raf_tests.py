@@ -1,5 +1,6 @@
 import unittest
-from services.raf import Beneficiary, Diagnosis, RafCalculator
+from services.raf import Beneficiary, Diagnosis, RafCalculator, RafService
+from datetime import datetime
 
 
 # TODO Improve this
@@ -13,14 +14,14 @@ class CalculatorTestCase(unittest.TestCase):
 
     # TODO write this properly
     def testCalculator(self):
-        jane = Beneficiary(2, "female", "19740824", 1, True)
+        jane = Beneficiary(2, "female", datetime.strptime("19740824", "%Y%m%d"), 1, True)
         jane.add_diagnosis(Diagnosis("D66"))
         jane.add_diagnosis(Diagnosis("C182"))
         jane.add_diagnosis(Diagnosis("C638"))
         jane.add_diagnosis(Diagnosis("C9330"))
         jane.add_diagnosis(Diagnosis("I071"))
 
-        daniel = Beneficiary(1, "male", "19530824", 0)
+        daniel = Beneficiary(1, "male", datetime.strptime("19530824", "%Y%m%d"), 0)
         daniel.add_diagnosis(Diagnosis("A0223"))  # 51
         daniel.add_diagnosis(Diagnosis("A0224"))  # 52
         daniel.add_diagnosis(Diagnosis("D66"))
@@ -31,7 +32,7 @@ class CalculatorTestCase(unittest.TestCase):
         daniel.add_diagnosis(Diagnosis("A072"))
         daniel.add_diagnosis(Diagnosis("C153"))
 
-        no_cancer = Beneficiary(2, "female", "19740824", 1, True)
+        no_cancer = Beneficiary(2, "female", datetime.strptime("19740824", "%Y%m%d"), 1, True)
         no_cancer.add_diagnosis(Diagnosis("D66"))
         no_cancer.add_diagnosis(Diagnosis("A3681"))
         no_cancer.add_diagnosis(Diagnosis("E0800"))
@@ -40,6 +41,10 @@ class CalculatorTestCase(unittest.TestCase):
         print(calc.calculate(jane))
         print(calc.calculate(daniel))
         print(calc.calculate(no_cancer))
+
+    def testExcel(self):
+        print("here")
+        RafService.calculateExcel()    
 
 
 if __name__ == '__main__':

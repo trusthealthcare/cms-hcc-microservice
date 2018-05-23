@@ -1,6 +1,7 @@
 import unittest
 from services.raf import Beneficiary, Diagnosis, RafCalculator, RafService
 from datetime import datetime
+from openpyxl import load_workbook
 
 
 # TODO Improve this
@@ -44,7 +45,47 @@ class CalculatorTestCase(unittest.TestCase):
 
     def testExcel(self):
         print("here")
-        RafService.calculateExcel()    
+        RafService.calculateExcel()
+
+    def testSasCompare(self):
+        print("Test Sas Compare")
+        wb = load_workbook('../test_data/unit-test.xlsx', data_only=True)
+        data_name = wb['data']
+        result_sheet = wb['results']
+
+        row = 2
+        calc = RafCalculator()
+        while True:
+            if not data_name['A' + str(row)].value:
+                break
+            beneficiary = Beneficiary(data_name['A' + str(row)].value,
+                                      data_name['B' + str(row)].value,
+                                      data_name['C' + str(row)].value,
+                                      data_name['D' + str(row)].value,
+                                      data_name['E' + str(row)].value,
+                                      data_name['F' + str(row)].value,
+                                      datetime.strptime("20180201", "%Y%m%d")
+                                      )
+            for i in ['G', 'H', 'I','J','K', 'L', 'M', 'N', 'O', 'P']:
+                if data_name[i + str(row)].value != '':
+                    beneficiary.add_diagnosis(Diagnosis(data_name[i + str(row)].value))
+
+            results = calc.calculate(beneficiary)
+            community_na_result = results['totals']['Community NA']
+            community_na_valid = result_sheet['HP' + str(row)].value
+            print(results)
+            print(str(community_na_result) + ' - ' + str(community_na_valid))
+            print(row)
+            # 5 is an arbitrary large enough number to round.  avoids trailing 0000001.
+            assert round(community_na_result, 5) == community_na_valid
+            assert round(results['totals']['Community ND'], 5) == result_sheet['HQ' + str(row)].value
+            assert round(results['totals']['Community FBA'], 5) == result_sheet['HR' + str(row)].value
+            assert round(results['totals']['Community FBD'], 5) == result_sheet['HS' + str(row)].value
+            assert round(results['totals']['Community PBA'], 5) == result_sheet['HT' + str(row)].value
+            assert round(results['totals']['Community PBD'], 5) == result_sheet['HU' + str(row)].value
+
+            row += 1
+        assert True
 
 
 if __name__ == '__main__':

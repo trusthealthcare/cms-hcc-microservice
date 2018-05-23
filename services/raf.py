@@ -64,7 +64,7 @@ class RafService:
                                       sheet_name['E' + str(row)].value,
                                       sheet_name['F' + str(row)].value,
                                       )
-            for i in ['G','H','I','K','L','M','N','O','P']:
+            for i in ['G','H','I','J','K','L','M','N','O','P']:
                 if sheet_name[i + str(row)].value != '':
                     beneficiary.add_diagnosis(Diagnosis(sheet_name[i + str(row)].value))
 

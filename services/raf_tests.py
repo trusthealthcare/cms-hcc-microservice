@@ -71,13 +71,8 @@ class CalculatorTestCase(unittest.TestCase):
                     beneficiary.add_diagnosis(Diagnosis(data_name[i + str(row)].value))
 
             results = calc.calculate(beneficiary)
-            community_na_result = results['totals']['New Enrollee']
-            community_na_valid = result_sheet['HW' + str(row)].value
-            print(results)
-            print(str(community_na_result) + ' - ' + str(community_na_valid))
-            print(row)
             # 5 is an arbitrary large enough number to round.  avoids trailing 0000001.
-            assert round(community_na_result, 5) == community_na_valid
+            assert round(results['totals']['Community NA'], 5) == result_sheet['HP' + str(row)].value
             assert round(results['totals']['Community ND'], 5) == result_sheet['HQ' + str(row)].value
             assert round(results['totals']['Community FBA'], 5) == result_sheet['HR' + str(row)].value
             assert round(results['totals']['Community FBD'], 5) == result_sheet['HS' + str(row)].value
@@ -87,6 +82,7 @@ class CalculatorTestCase(unittest.TestCase):
             assert round(results['totals']['New Enrollee'], 5) == result_sheet['HW' + str(row)].value
             assert round(results['totals']['SNP New Enrollee'], 5) == result_sheet['HX' + str(row)].value
 
+            print(row)
             row += 1
         assert True
 

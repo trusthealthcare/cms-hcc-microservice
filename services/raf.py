@@ -241,7 +241,8 @@ class RafCalculator:
         for model in self.data["models"]:
             total = 0
             for attribute_name in attributes:
-                total += attributes[attribute_name]["coefficients"][model["name"]]
+                if attributes[attribute_name]["valid"]:
+                    total += attributes[attribute_name]["coefficients"][model["name"]]
             totals[model["name"]] = total
 
         # 14. Done!
@@ -313,15 +314,15 @@ class RafCalculator:
         elif 64 < age <= 69:
             age = "65_69"
         elif 69 < age <= 74:
-            age = "70-74"
+            age = "70_74"
         elif 74 < age <= 79:
-            age = "75-79"
+            age = "75_79"
         elif 79 < age <= 84:
-            age = "80-84"
+            age = "80_84"
         elif 84 < age <= 89:
-            age = "85-89"
+            age = "85_89"
         elif 89 < age <= 94:
-            age = "90-94"
+            age = "90_94"
         elif age > 94:
             age = "95_GT"
         return age

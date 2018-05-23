@@ -28292,7 +28292,7 @@
       },{
         "description": "Vascular 1",
         "hcc": "HCC106",
-        "invalidHcc": ["HCC107","HCC108"]
+        "invalidHcc": ["HCC107","HCC108", "HCC161", "HCC189"]
       },{
         "description": "Vascular 2",
         "hcc": "HCC107",

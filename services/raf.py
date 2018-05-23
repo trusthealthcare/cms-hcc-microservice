@@ -256,10 +256,10 @@ class RafCalculator:
         short_circuit = False
         # Do the simple edits.
         if beneficiary.sex == 2 and (diagnosis.icdcode == "D66" or diagnosis.icdcode == "D67"):
-            self.__add_code(attributes, 48, diagnosis.icdcode)
+            self.__add_code(attributes, "HCC48", diagnosis.icdcode)
             short_circuit = True
         elif beneficiary.age < 18 and diagnosis.icdcode in self.data["ageIcdCheck"]:
-            self.__add_code(attributes, 112, diagnosis.icdcode)
+            self.__add_code(attributes, "HCC112", diagnosis.icdcode)
             short_circuit = True
         elif (beneficiary.age < 6 or beneficiary.age > 18) and diagnosis.icdcode == "F3481":
             invalid[diagnosis.icdcode] = "This is only valid for children between 7 and 17"

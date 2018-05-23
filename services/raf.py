@@ -176,7 +176,10 @@ class RafCalculator:
             ne_age_range = age_range
         # This edge case is allowed on purpose: beneficiary.age == 64 and beneficiary.original_reason_entitlement == 0:
         else:
-            ne_age_range = str(beneficiary.age)
+            if beneficiary.age == 64:
+                ne_age_range = str(beneficiary.age+1)
+            else:
+                ne_age_range = str(beneficiary.age)
 
         self.__add_demographic((sex + age_range), attributes)
 
@@ -348,17 +351,17 @@ class RafCalculator:
         Community level interactions
     """
     def __create_community_interactions(self, attributes, diag_cat):
-        if "HCC47" in attributes and diag_cat["cancer"]:
+        if "HCC47" in attributes and attributes["HCC47"]["valid"] and diag_cat["cancer"]:
             self.__add_interaction("HCC47_gCancer", attributes)
-        if "HCC85" in attributes and diag_cat["diabetes"]:
+        if "HCC85" in attributes and attributes["HCC85"]["valid"] and diag_cat["diabetes"]:
             self.__add_interaction("HCC85_gDiabetesMellit", attributes)
-        if "HCC85" in attributes and diag_cat["g_copd_cf"]:
+        if "HCC85" in attributes and attributes["HCC85"]["valid"] and diag_cat["g_copd_cf"]:
             self.__add_interaction("HCC85_gCopdCF", attributes)
-        if "HCC85" in attributes and diag_cat["renal"]:
+        if "HCC85" in attributes and attributes["HCC85"]["valid"] and diag_cat["renal"]:
             self.__add_interaction("HCC85_gRenal", attributes)
         if diag_cat["card_resp_fail"] and diag_cat["g_copd_cf"]:
             self.__add_interaction("gRespDepandArre_gCopdCF", attributes)
-        if "HCC85" in attributes and "HCC96" in attributes:
+        if "HCC85" in attributes and attributes["HCC85"]["valid"] and "HCC96" in attributes and attributes["HCC96"]["valid"]:
             self.__add_interaction("HCC85_HCC96", attributes)
         if diag_cat["g_substance_abuse"] and diag_cat["g_psychiatric"]:
             self.__add_interaction("gSubstanceAbuse_gPsychiatric", attributes)
@@ -374,37 +377,37 @@ class RafCalculator:
             self.__add_interaction("gCopdCF_CARD_RESP_FAIL", attributes)
         if diag_cat["sepsis"] and pressure_ulcer:
             self.__add_interaction("SEPSIS_PRESSURE_ULCER", attributes)
-        if diag_cat["sepsis"] and "HCC188" in attributes:
+        if diag_cat["sepsis"] and "HCC188" in attributes and attributes["HCC188"]["valid"]:
             self.__add_interaction("SEPSIS_ARTIF_OPENINGS", attributes)
-        if "HCC188" in attributes and pressure_ulcer:
+        if "HCC188" in attributes and attributes["HCC188"]["valid"] and pressure_ulcer:
             self.__add_interaction("ART_OPENINGS_PRESSURE_ULCER", attributes)
         if diag_cat["diabetes"] and diag_cat["chf"]:
             self.__add_interaction("DIABETES_CHF", attributes)
-        if diag_cat["g_copd_cf"] and "HCC114" in attributes:
+        if diag_cat["g_copd_cf"] and "HCC114" in attributes and attributes["HCC114"]["valid"]:
             self.__add_interaction("gCopdCF_ASP_SPEC_BACT_PNEUM", attributes)
-        if "HCC114" in attributes and pressure_ulcer:
+        if "HCC114" in attributes and attributes["HCC114"]["valid"] and pressure_ulcer:
             self.__add_interaction("ASP_SPEC_BACT_PNEUM_PRES_ULC", attributes)
-        if diag_cat["sepsis"] and "HCC114" in attributes:
+        if diag_cat["sepsis"] and "HCC114" in attributes and attributes["HCC114"]["valid"]:
             self.__add_interaction("SEPSIS_ASP_SPEC_BACT_PNEUM", attributes)
-        if "HCC57" in attributes and diag_cat["g_copd_cf"]:
+        if "HCC57" in attributes and attributes["HCC57"]["valid"] and diag_cat["g_copd_cf"]:
             self.__add_interaction("SCHIZOPHRENIA_gCopdCF", attributes)
-        if "HCC57" in attributes and diag_cat["chf"]:
+        if "HCC57" in attributes and attributes["HCC57"]["valid"] and diag_cat["chf"]:
             self.__add_interaction("SCHIZOPHRENIA_CHF", attributes)
-        if "HCC57" in attributes and "HCC79" in attributes:
+        if "HCC57" in attributes and attributes["HCC57"]["valid"] and "HCC79" in attributes:
             self.__add_interaction("SCHIZOPHRENIA_SEIZURES", attributes)
 
         if disabled:
-            if "HCC85" in attributes:
+            if "HCC85" in attributes and attributes["HCC85"]["valid"]:
                 self.__add_interaction("DISABLED_HCC85", attributes)
             if pressure_ulcer:
                 self.__add_interaction("DISABLED_PRESSURE_ULCER", attributes)
-            if "HCC161" in attributes:
+            if "HCC161" in attributes and attributes["HCC161"]["valid"]:
                 self.__add_interaction("DISABLED_HCC161", attributes)
-            if "HCC39" in attributes:
+            if "HCC39" in attributes and attributes["HCC39"]["valid"]:
                 self.__add_interaction("DISABLED_HCC39", attributes)
-            if "HCC77" in attributes:
+            if "HCC77" in attributes and attributes["HCC77"]["valid"]:
                 self.__add_interaction("DISABLED_HCC77", attributes)
-            if "HCC6" in attributes:
+            if "HCC6" in attributes and attributes["HCC6"]["valid"]:
                 self.__add_interaction("DISABLED_HCC6", attributes)
 
     @staticmethod

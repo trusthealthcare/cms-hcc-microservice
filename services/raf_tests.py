@@ -71,8 +71,8 @@ class CalculatorTestCase(unittest.TestCase):
                     beneficiary.add_diagnosis(Diagnosis(data_name[i + str(row)].value))
 
             results = calc.calculate(beneficiary)
-            community_na_result = results['totals']['Community NA']
-            community_na_valid = result_sheet['HP' + str(row)].value
+            community_na_result = results['totals']['New Enrollee']
+            community_na_valid = result_sheet['HW' + str(row)].value
             print(results)
             print(str(community_na_result) + ' - ' + str(community_na_valid))
             print(row)
@@ -83,6 +83,9 @@ class CalculatorTestCase(unittest.TestCase):
             assert round(results['totals']['Community FBD'], 5) == result_sheet['HS' + str(row)].value
             assert round(results['totals']['Community PBA'], 5) == result_sheet['HT' + str(row)].value
             assert round(results['totals']['Community PBD'], 5) == result_sheet['HU' + str(row)].value
+            assert round(results['totals']['Institutional'], 5) == result_sheet['HV' + str(row)].value
+            assert round(results['totals']['New Enrollee'], 5) == result_sheet['HW' + str(row)].value
+            assert round(results['totals']['SNP New Enrollee'], 5) == result_sheet['HX' + str(row)].value
 
             row += 1
         assert True

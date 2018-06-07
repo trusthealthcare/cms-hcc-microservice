@@ -1,8 +1,6 @@
 # 2018 CMS HCC Model V22 Microservice:
 
-This is a port of the CMS Risk Adjustment Model V22 with python/flask.  
-
-*** _Still a work in progress.  Use at your own risk*_ ***
+This is a port of the 2018 CMS Risk Adjustment Model V22 with python/flask.  
 
 ## Requirements:  
 
